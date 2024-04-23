@@ -37,7 +37,7 @@ module.exports = class Evenement {
             description: req.body.description
         };
 
-        let file = req.file; // Access uploaded file from request
+        let file = req.file; 
 
         const updatedEvent = await EventService.createEvent(comment, file);
 

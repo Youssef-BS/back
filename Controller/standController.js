@@ -1,72 +1,100 @@
-const StandService = require("../Service/standService");
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useParams, useNavigate } from 'react-router-dom';
+import "./standDetails.css";
 
-module.exports = class Stand {
-  static async apiGetAllStand(req, res, next) {
-    try {
-      const stands = await StandService.getAllStand();
-      if (!stands.length) {
-        return res.status(404).json("There are no Stands published yet!");
-      }
-      res.json(stands);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  }
+function StandDetails() {
+    const { id } = useParams();
+    const [stand, setStand] = useState(null);
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
+    const [Numero, setNumero] = useState('');
+    const [prix, setPrix] = useState('');
+    const [superficie, setSuperficie] = useState('');
+    const [disponibilite, setDisponibilite] = useState(false);
 
-  static async apiGetStandById(req, res, next) {
-    try {
-      const standId = req.params.id;
-      const stand = await StandService.getStandById(standId);
-      if (!stand) {
-        return res.status(404).json("Stand not found!");
-      }
-      res.json(stand);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  }
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3000/stand/getid/${id}`);
+                const fetchedStand = response.data;
+                setStand(fetchedStand);
+                setNumero(fetchedStand.Numero);
+                setPrix(fetchedStand.prix);
+                setSuperficie(fetchedStand.superficie);
+                setDisponibilite(fetchedStand.disponibilite);
+            } catch (error) {
+                setError(error.message);
+                console.error("Error fetching stand details:", error);
+            }
+        };
 
-  static async apiCreateStand(req, res, next) {
-    try {
-      const stand = {
-        prix: req.body.prix,
-        superficie: req.body.superficie,
-        disponibilite: true, // Assuming disponibilite is a boolean
-        Numero: req.body.Numero,
-      };
-      const createdStand = await StandService.createStand(stand);
-      res.json(createdStand);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  }
+        fetchData();
+    }, [id]);
 
-  static async apiUpdateStand(req, res, next) {
-    try {
-      const standId = req.params.id;
-      const updatedStandData = {
-        prix: req.body.prix,
-        superficie: req.body.superficie,
-        disponibilite: req.body.disponibilite,
-        Numero: req.body.Numero,
-      };
-      const updatedStand = await StandService.updateStand(standId, updatedStandData);
-      if (!updatedStand) {
-        throw new Error("Unable to update Stand, error occurred");
-      }
-      res.json(updatedStand);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  }
+    const handleUpdate = async () => {
+        try {
+            await axios.put(`http://localhost:3000/stand/update/${id}`, {
+                Numero,
+                prix,
+                superficie,
+                disponibilite
+            });
+            console.log("Stand updated successfully");
+            navigate('/stands');
+        } catch (error) {
+            console.error("Error updating stand:", error);
+        }
+    };
 
-  static async apiDeleteStand(req, res, next) {
-    try {
-      const standId = req.params.id;
-      const deleteResponse = await StandService.deleteStand(standId);
-      res.json(deleteResponse);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-};
+    return (
+        <div className="stand-details-container">
+            <h2>Détails de stand</h2>
+            {error ? (
+                <div className="error-message">Erreur : {error}</div>
+            ) : stand ? (
+                <form>
+                    <div className="stand-details">
+                        <div className="stand-info">
+                            <label>Numero:</label>
+                            <input
+                                type="text"
+                                value={Numero}
+                                onChange={(e) => setNumero(e.target.value)}
+                            />
+                        </div>
+                        <div className="stand-info">
+                            <label>Prix:</label>
+                            <input
+                                type="text"
+                                value={prix}
+                                onChange={(e) => setPrix(e.target.value)}
+                            />
+                        </div>
+                        <div className="stand-info">
+                            <label>Superficie:</label>
+                            <input
+                                type="text"
+                                value={superficie}
+                                onChange={(e) => setSuperficie(e.target.value)}
+                            />
+                        </div>
+                        <div className="stand-info">
+                            <label>Disponibilité:</label>
+                            <input
+                                type="checkbox"
+                                checked={disponibilite}
+                                onChange={(e) => setDisponibilite(e.target.checked)}
+                            />
+                        </div>
+                        <button type="button" onClick={handleUpdate}>Mettre à Jour</button>
+                    </div>
+                </form>
+            ) : (
+                <div className="loading-message">Chargement...</div>
+            )}
+        </div>
+    );
+}
+
+export default StandDetails;
