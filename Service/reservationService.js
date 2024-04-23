@@ -1,7 +1,9 @@
 const Reservation = require("../model/reservation");
 
 module.exports = class ReservationService {
+  
   static async reservation_stand(req) {
+
     const { evenementId, userId } = req.body;
     try {
       if (!evenementId || !userId) {

@@ -19,7 +19,7 @@ app.listen(3000,()=>{ // definir port
 app.use(express.json())//permet express utilise json 
 
 app.use(cors()); // Utilisation du middleware CORS pour autoriser les requêtes cross-origin
-
+app.use('/uploads', express.static('uploads'));
 /* passport */
 app.use(passport.initialize())
 require('./security/passport')(passport)

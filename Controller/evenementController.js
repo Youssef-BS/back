@@ -28,23 +28,24 @@ module.exports = class Evenement {
     }
   }
 
-  static async apiCreateEvent(req, res, next){
+ static async apiCreateEvent(req, res, next) {
     try {
-       const comment = {}
-       comment.EventName  = req.body.EventName;
-       comment.DateDebut  = req.body.DateDebut;
-       comment.DateFin    = req.body.DateFin;
-       comment.description = req.body.description;
-  
+        const comment = {
+            EventName: req.body.EventName,
+            DateDebut: req.body.DateDebut,
+            DateFin: req.body.DateFin,
+            description: req.body.description
+        };
 
-       const updatedEvent = await EventService.createEvent(comment);
+        let file = req.file; // Access uploaded file from request
 
-       res.json(updatedEvent);
+        const updatedEvent = await EventService.createEvent(comment, file);
 
+        res.json(updatedEvent);
     } catch (error) {
-       res.status(500).json({error: error});
+        res.status(500).json({ error: error });
     }
- }
+}
  
   static async apiUpdateEvent(req, res, next) {
     try {

@@ -1,35 +1,49 @@
 const Evenement = require("../model/evenement");
 const Foire = require("../model/foire");
+const multer = require('multer');
+const path = require('path');
+
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/') 
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname)) 
+    }
+});
+
+const upload = multer({ storage: storage });
+
 
 class EvenementService {
   
   static async getAllEvent(){
     try {
-        const AllEvent = await  Evenement.find();
+        const AllEvent = await Evenement.find();
         return AllEvent;
     } catch (error) {
         console.log(`Could not fetch events ${error}`)
     }
 }
 
-static async createEvent(data){
-  try {
-
-      const newEvent = {
-          EventName: data.EventName,
-          DateDebut: data.DateDebut,
-          DateFin: data.DateFin,
-          description: data.description,
-      }
-     const response = await new Evenement(newEvent).save();
-     const foire = await Foire.findById("65c220ca9aeb263b734a054b");
-     foire.evenements.push(response._id);
-     await foire.save();
-     return response;
-  } catch (error) {
-      console.log(error);
-  } 
-
+static async createEvent(data, file) {
+    try {
+        const newEvent = {
+            EventName: data.EventName,
+            DateDebut: data.DateDebut,
+            DateFin: data.DateFin,
+            description: data.description,
+            photo: file ? file.path : null 
+        }
+        const response = await new Evenement(newEvent).save();
+        const foire = await Foire.findById("65c220ca9aeb263b734a054b");
+        foire.evenements.push(response._id);
+        await foire.save();
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
 }
 
   static async getEventById(eventId) {
