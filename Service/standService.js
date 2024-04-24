@@ -1,55 +1,48 @@
 const Stand = require("../model/stand");
-const Foire = require("../model/foire");
 
-module.exports = class StandService {
-  static async getAllStand() {
-    try {
-      return await Stand.find();
-    } catch (error) {
-      console.error(`Could not fetch Stands: ${error}`);
-      throw error;
+module.exports = class StandService{
+    static async getAllStand(){
+        try {
+            return await Stand.find();
+        } catch (error) {
+            throw new Error(`Could not fetch Stands: ${error.message}`);
+        }
     }
-  }
 
-  static async createStand(data) {
-    try {
-      const newStand = await Stand.create(data);
-      const foire = await Foire.findById("65c220ca9aeb263b734a054b");
-      foire.stands.push(newStand._id);
-      await foire.save();
-      return newStand;
-    } catch (error) {
-      console.error(`Could not create Stand: ${error}`);
-      throw error;
+    static async createStand(data){
+        try {
+           const response = await Stand.create(data);
+           return response;
+        } catch (error) {
+            throw new Error(`Could not create Stand: ${error.message}`);
+        } 
     }
-  }
 
-  static async getStandById(standId) {
-    try {
-      return await Stand.findById(standId);
-    } catch (error) {
-      console.error(`Stand not found: ${error}`);
-      throw error;
+    static async getStandById(standId){
+        try {
+            return await Stand.findById(standId);
+        } catch (error) {
+            throw new Error(`Stand not found: ${error.message}`);
+        }
     }
-  }
 
-  static async updateStand(standId, updateData) {
-    try {
-      const updatedStand = await Stand.findByIdAndUpdate(standId, updateData, { new: true });
-      return updatedStand;
-    } catch (error) {
-      console.error(`Could not update Stand: ${error}`);
-      throw error;
+    static async updateStand(standId, newData){
+        try {
+            const updatedStand = await Stand.findByIdAndUpdate(standId, newData, { new: true });
+            if (!updatedStand) {
+               throw new Error("Stand not found");
+            }
+            return updatedStand;
+        } catch (error) {
+            throw new Error(`Could not update Stand: ${error.message}`);
+        }
     }
-  }
 
-  static async deleteStand(standId) {
-    try {
-      const deletedStand = await Stand.findByIdAndDelete(standId);
-      return deletedStand;
-    } catch (error) {
-      console.error(`Could not delete Stand: ${error}`);
-      throw error;
+    static async deleteStand(standId){
+        try {
+            return await Stand.findByIdAndDelete(standId);
+        } catch (error) {
+            throw new Error(`Could not delete Stand: ${error.message}`);
+        }
     }
-  }
-};
+}
